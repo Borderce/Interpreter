@@ -68,7 +68,7 @@
       [(<) (< (1st args) (2nd args))]
       [(cons) (cons (1st args) (2nd args))]
       [(=) (= (1st args) (2nd args))]
-      [(car) (car (1st args)]
+      [(car) (car (1st args))]
       [(cdr) (cdr (1st args))]
       [(list) (map list args)]
       [(null?) (null? (1st args))]
