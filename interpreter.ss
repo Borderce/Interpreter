@@ -90,7 +90,7 @@
       [(symbol?) (symbol? (1st args))]
       [(set-car!) (set-car! (1st args) (2nd args))]
       [(set-cdr!) (set-cdr! (1st args) (2nd args))]
-      [(vector-set!) (vector-set! (1st args) (2nd args))]
+      [(vector-set!) (vector-set! (1st args) (2nd args) (3rd args))]
       [(display) (display (1st args))]
       [(newline) newline]
       [else (error 'apply-prim-proc 
