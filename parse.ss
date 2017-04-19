@@ -2,6 +2,10 @@
 
 ; You will want to replace this with your parser that includes more expression types, more options for these types, and error-checking.
 
+(define 1st car)
+(define 2nd cadr)
+(define 3rd caddr)
+
 (define-datatype assignment assignment?
 	(ass-exp
 		(var symbol?)
