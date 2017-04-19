@@ -70,7 +70,7 @@
       [(=) (= (1st args) (2nd args))]
       [(car) (car (1st args))]
       [(cdr) (cdr (1st args))]
-      [(list) (map list args)]
+      [(list) (apply append args '())]
       [(null?) (null? (1st args))]
       [(assq) (assq (1st args) (2nd args))]
       [(eq?) (eq? (1st args) (2nd args))]
