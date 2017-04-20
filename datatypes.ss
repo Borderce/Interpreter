@@ -2,37 +2,37 @@
 ;; Parsed expression datatypes
 
 (define-datatype expression expression? 
-  (var-exp
-      (id symbol?))
-  (lit-exp
-	    (lit literal?))
-  (if-exp
+  [var-exp
+      (id symbol?)]
+  [lit-exp
+	    (lit literal?)]
+  [if-exp
 	    (pred expression?)
-	(true-body expression?))
-  (if-else-exp
+	    (true-body expression?)]
+  [if-else-exp
 	    (pred expression?)
-	(true-body expression?)
-	(false-body expression?))
-  (set!-exp
+	    (true-body expression?)
+	    (false-body expression?)]
+  [set!-exp
 	    (id symbol?)
-	(body expression?))
-  (let-exp
+	    (body expression?)]
+  [let-exp
 	    (id symbol?)
 	    (vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	    (body (list-of expression?)))
-  (named-let-exp
+	    (body (list-of expression?))]
+  [named-let-exp
       (name symbol?)
-	(vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	    (body (list-of expression?)))
-  (lambda-exp
+	    (vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
+	    (body (list-of expression?))]
+  [lambda-exp
       (id (list-of symbol?))
-      (body (list-of expression?)))
-  (lambda-exp-variable
+      (body (list-of expression?))]
+  [lambda-exp-variable
       (id symbol?)
-	    (body (list-of expression?)))
-  (app-exp
+	    (body (list-of expression?))]
+  [app-exp
 	    (rator expression?)
-      (rand (list-of expression?))))
+      (rand (list-of expression?))])
 
 	
 ; datatype for procedures.  At first there is only one
