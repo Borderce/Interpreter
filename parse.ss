@@ -6,43 +6,7 @@
 (define 2nd cadr)
 (define 3rd caddr)
 
-(define-datatype assignment assignment?
-	(ass-exp
-		(var symbol?)
-		(val expression?)))
 
-(define-datatype expression expression? 
-  (var-exp
-    (id symbol?))
-  (lit-exp
-	(lit literal?))
-  (if-exp
-	(pred expression?)
-	(true-body expression?))
-  (if-else-exp
-	(pred expression?)
-	(true-body expression?)
-	(false-body expression?))
-  (set!-exp
-	(id symbol?)
-	(body expression?))
-  (let-exp
-	(id symbol?)
-	(vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	(body (list-of expression?)))
-  (named-let-exp
-    (name symbol?)
-	(vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	(body (list-of expression?)))
-  (lambda-exp
-    (id (list-of symbol?))
-    (body (list-of expression?)))
-  (lambda-exp-variable
-    (id symbol?)
-	(body (list-of expression?)))
-  (app-exp
-	(rator expression?)
-    (rand (list-of expression?))))
 
 (define literal?
 	(lambda (x)

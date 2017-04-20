@@ -3,36 +3,36 @@
 
 (define-datatype expression expression? 
   (var-exp
-    (id symbol?))
+      (id symbol?))
   (lit-exp
-	(lit literal?))
+	    (lit literal?))
   (if-exp
-	(pred expression?)
+	    (pred expression?)
 	(true-body expression?))
   (if-else-exp
-	(pred expression?)
+	    (pred expression?)
 	(true-body expression?)
 	(false-body expression?))
   (set!-exp
-	(id symbol?)
+	    (id symbol?)
 	(body expression?))
   (let-exp
-	(id symbol?)
-	(vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	(body (list-of expression?)))
+	    (id symbol?)
+	    (vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
+	    (body (list-of expression?)))
   (named-let-exp
-    (name symbol?)
+      (name symbol?)
 	(vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	(body (list-of expression?)))
+	    (body (list-of expression?)))
   (lambda-exp
-    (id (list-of symbol?))
-    (body (list-of expression?)))
+      (id (list-of symbol?))
+      (body (list-of expression?)))
   (lambda-exp-variable
-    (id symbol?)
-	(body (list-of expression?)))
+      (id symbol?)
+	    (body (list-of expression?)))
   (app-exp
-	(rator expression?)
-    (rand (list-of expression?))))
+	    (rator expression?)
+      (rand (list-of expression?))))
 
 	
 ; datatype for procedures.  At first there is only one
