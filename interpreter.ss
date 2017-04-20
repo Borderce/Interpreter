@@ -42,7 +42,7 @@
                    "Attempt to apply bad procedure: ~s" 
                     proc-value)])))
 
-(define *prim-proc-names* '(+ - * / add1 sub1 zero? not = < cons car cdr list null? assq eq? equal? atom? length list->vector list? pair? procedure? vector->list vector make-vector vector-ref vector? number? symbol? set-car! set-cdr! vector-set! display newline caar cadr cddr caaar cdddr caddr caadr))
+(define *prim-proc-names* '(+ - * / add1 sub1 zero? not = < cons car cdr list null? assq eq? equal? atom? length list->vector list? pair? procedure? vector->list vector make-vector vector-ref vector? number? symbol? set-car! set-cdr! vector-set! display newline caar cadr cddr cdar caaar cadar cdddr caddr caadr cdaar cddar cdadr))
 
 (define init-env         ; for now, our initial global environment only contains 
   (extend-env            ; procedure names.  Recall that an environment associates
@@ -92,7 +92,19 @@
       [(set-cdr!) (set-cdr! (1st args) (2nd args))]
       [(vector-set!) (vector-set! (1st args) (2nd args) (3rd args))]
       [(display) (display (1st args))]
-      [(newline) newline]
+      [(newline) (newline)]
+      [(caar) (caar (1st args))]
+      [(cadr) (cadr (1st args))]
+      [(cddr) (cddr (1st args))]
+      [(cdar) (cdar (1st args))]
+      [(caaar) (caaar (1st args))]
+      [(caadr) (caadr (1st args))]
+      [(caddr) (caddr (1st args))]
+      [(cdddr) (cdddr (1st args))]
+      [(cadar) (cadar (1st args))]
+      [(cddar) (cddar (1st args))]
+      [(cdadr) (cdadr (1st args))]
+      [(cdaar) (cdaar (1st args))]
       [else (error 'apply-prim-proc 
             "Bad primitive procedure name: ~s" 
             prim-op)])))
