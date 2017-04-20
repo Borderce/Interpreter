@@ -13,6 +13,8 @@
 	    (pred expression?)
 	    (true-body expression?)
 	    (false-body expression?)]
+  [quoted-exp
+    (data scheme-value?)]
   [set!-exp
 	    (id symbol?)
 	    (body expression?)]
@@ -34,13 +36,36 @@
 	    (rator expression?)
       (rand (list-of expression?))])
 
+(define literal?
+	(lambda (x)
+		(ormap
+			(lambda (pred) (pred x))
+				(list number? vector? boolean? symbol? string? null?))))
+
 	
 ; datatype for procedures.  At first there is only one
 ; kind of procedure, but more kinds will be added later.
 
 (define-datatype proc-val proc-val?
   [prim-proc
-   (name symbol?)])
+   (name symbol?)]
+   [closure
+		(params (lambda (x) (or (list-of symbol? x) (symbol? x) (check-syms x))))
+		(body (list-of expression?))
+		(env environment?)])
+	 
+(define check-syms
+  (lambda (syms)
+    (if (null? syms)
+	#t
+	(if (pair? (cdr syms))
+	    (if (symbol? (car syms))
+		(check-syms (cdr syms))
+		#f)
+	    (if (symbol? (car syms))
+		(symbol? (cdr syms))
+		#f)))))	 
+	 
 	 
 	 
 	 
@@ -53,6 +78,6 @@
 (define-datatype environment environment?
   (empty-env-record)
   (extended-env-record
-   (syms (list-of symbol?))
+   (syms (lambda (x) (or (pair? x) (symbol? x) (null? x))))
    (vals (list-of scheme-value?))
    (env environment?)))
