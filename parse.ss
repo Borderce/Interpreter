@@ -5,49 +5,46 @@
 (define 1st car)
 (define 2nd cadr)
 (define 3rd caddr)
+(define 4th cadddr)
+
+(define parse-exp         
+  (lambda (datum)
+    (cond
+     [(symbol? datum) (var-exp datum)]
+     [(literal? datum) (lit-exp datum)]
+     [(pair? datum)
+      (if (not (list? datum))
+		(eopl:error 'parse-exp "expression must be a proper list: ~s" datum)
+		(cond 
+			[(eqv? (1st datum) 'lambda)
+				(if (null? (cddr datum))
+					(eopl:error 'parse-exp "too few arguments to lambda expression: ~s" datum)
+					(lambda-exp (2nd datum) (map parse-exp (cddr datum))))]
+			[(eqv? (1st datum) 'if)
+				(if (or	(null? (cdr datum))
+						(null? (cddr datum)))
+					(eopl:error 'parse-exp "too few cases to if expression: ~s" datum)
+					(if (null? (cdddr datum))
+						(if-exp (parse-exp (2nd datum)) (parse-exp (3rd datum)))
+						(if (null? (cddddr datum))
+							(if-else-exp (parse-exp (2nd datum)) (parse-exp (3rd datum)) (parse-exp (4th datum)))
+							(eopl:error 'parse-exp "too many cases to if expression: ~s" datum))))]
+			[(eqv? (1st datum) 'let)
+				(let-exp (map car (2nd datum)) (map parse-exp (map cadr (2nd datum))) (map parse-exp (cddr datum)))]
+			[(eqv? (1st datum) 'quote)
+				(if (or (not (null? (cdr datum)))
+						(null? (cddr datum)))
+					(quoted-exp (2nd datum))
+					(eopl:error 'parse-exp "invalid arguments to quote-exp: ~s" datum))]
+			[else (app-exp (parse-exp (1st datum))
+				(map parse-exp (cdr datum)))]))]
+     [else (eopl:error 'parse-exp "bad expression: ~s" datum)])))
 
 
 
 (define literal?
 	(lambda (x)
 		(and (not (pair? x)) (or (number? x) (string? x) (boolean? x) (vector? x)))))
-	
-(define parse-exp
-  (lambda (datum)
-    (cond
-      ((symbol? datum) (var-exp datum))
-	  ((literal? datum) (lit-exp datum))
-      ((pair? datum)
-       (if (not (list? datum))
-           (eopl:error 'parse-exp "Expression must be a proper list: ~s" datum)
-           (cond 
-       	     [(eqv? (car datum) 'lambda)
-              (if  (> 3 (length datum))
-                  (eopl:error 'parse-exp "Too few args to lambda: ~s" datum)
-                  (if (symbol? (cadr datum))
-                     	(lambda-exp-variable (cadr datum) (map parse-exp (cddr datum)))
-                      (if (not (andmap symbol? (cadr datum))) (eopl:error 'parse-exp "Lambda args must be symbols: ~s" datum)
-                      (lambda-exp (cadr datum)
-                        (map parse-exp (cddr datum))))))]
-          		 [(eqv? (car datum) 'if) (if (> 3 (length datum)) (eopl:error 'parse-exp "Too few args to if: ~s" datum)
-        		    (if (null? (cdddr datum))
-							(if (not (= (length datum) 3)) (eopl:error 'parse-exp "Wrong number of args to if: ~s" datum)
-
-             			  (if-exp (parse-exp (cadr datum)) (parse-exp (caddr datum))))
-						  (if (not (= (length datum) 4)) (eopl:error 'parse-exp "Wrong number of args to a if-then: ~s" datum)
-             			  (if-else-exp (parse-exp (cadr datum)) (parse-exp (caddr datum)) (parse-exp (cadddr datum))))))]
-          		 [(eqv? (car datum) 'set!) (if (not (= 3 (length datum))) (eopl:error 'parse-exp "Error in set!: ~s" datum)
-        		    (set!-exp (cadr datum) (parse-exp (caddr datum))))]
-          		 [(eqv? (car datum) 'let) (if (> 3 (length datum)) (eopl:error 'parse-exp "No body: ~s" datum) (if (or (not (list? (cadr datum))) (not (andmap list? (cadr datum))) (not (andmap (lambda (x) (= 2 (length x))) (cadr datum))) (not (andmap (lambda (x) (symbol? (car x))) (cadr datum)))) (eopl:error 'parse-exp "Improper let args: ~s" datum) (if (symbol? (cadr datum))
-                                     			  (named-let-exp (cadr datum) (map parse-exp (caddr datum)) (map parse-exp (cdddr datum)))
-                                     			  (let-exp (car datum) (map parse-exp (cadr datum)) (map parse-exp (cddr datum))))))]
-          		 [(or (eqv? 'letrec (car datum)) (eqv? 'let* (car datum))) (if (or (not (list? (cadr datum))) (not (andmap list? (cadr datum))) (not (andmap (lambda (x) (= 2 (length x))) (cadr datum))) (not (andmap (lambda (x) (symbol? (car x))) (cadr datum)))) (eopl:error 'parse-exp "Improper let args: ~s" datum) (if (> 3 (length datum)) (eopl:error 'parse-exp "No body to let ~s" datum)
-      		      (let-exp (car datum) (map parse-exp (cadr datum)) (map parse-exp (cddr datum)))))]
-         [else (app-exp
-                 (parse-exp (car datum))
-                 (map parse-exp (cdr datum)))])))
-       (else (eopl:error 'parse-exp
-               "Invalid syntax ~s" datum)))))
 
 (define unparse-exp 
   (lambda (exp)
