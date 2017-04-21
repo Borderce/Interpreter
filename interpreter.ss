@@ -19,6 +19,12 @@
 					(lambda () (eopl:error 'apply-env ; procedure to call if id not in env
 						"variable not found in environment: ~s"
 						id)))))]
+    [if-else-exp (testCase true-body false-body)
+      (if (eval-exp testCase env)
+        (eval-exp true-body env)
+        (eval-exp false-body env))]
+		[lambda-exp (id bodies)
+			(closure id bodies env)]
 		[quoted-exp (data) data]
 		[app-exp (rator rands)
 			(let ([proc-value (eval-exp rator env)]
@@ -122,7 +128,7 @@
       [(<) (< (1st args) (2nd args))]
       [(>) (> (1st args) (2nd args))]
       [(<=) (<= (1st args) (2nd args))]
-      [(>=) (>= (1sr args) (2nd args))]
+      [(>=) (>= (1st args) (2nd args))]
       [(cons) (cons (1st args) (2nd args))]
       [(=) (= (1st args) (2nd args))]
       [(car) (car (1st args))]
@@ -137,7 +143,7 @@
       [(list->vector) (list->vector (1st args))]
       [(list?) (list? (1st args))]
       [(pair?) (pair? (1st args))]
-      [(procedure?) (procedure? (1st args))]
+      [(procedure?) (proc-val? (1st args))]
       [(vector) (apply vector args)]
       [(vector->list) (vector->list (1st args))]
       [(make-vector) (apply make-vector args)]
@@ -166,14 +172,30 @@
             "Bad primitive procedure name: ~s" 
             prim-op)])))
 
+(define syntax-expand
+	(lambda (expr)
+		(cases expression expr
+			[lit-exp (datum) expr]
+			[var-exp (id) expr]
+			[lambda-exp (id bodies)
+				(lambda-exp id (map syntax-expand bodies))]
+			[if-else-exp (test true-body false-body)
+				(if-else-exp (syntax-expand test) (syntax-expand true-body) (syntax-expand false-body))]
+			[let-exp (vars vals bodies)
+				(app-exp (lambda-exp vars (map syntax-expand bodies)) (map syntax-expand vals))]
+			[quoted-exp (data) expr]
+			[app-exp (rator rands)
+				(app-exp (syntax-expand rator) (map syntax-expand rands))]
+			[else (eopl:error 'eval-exp "Bad abstract syntax: ~a" expr)])))
+
 (define rep      ; "read-eval-print" loop.
   (lambda ()
     (display "--> ")
     ;; notice that we don't save changes to the environment...
-    (let ([answer (top-level-eval (parse-exp (read)))])
+    (let ([answer (top-level-eval (syntax-expand (parse-exp (read))))])
       ;; TODO: are there answers that should display differently?
       (eopl:pretty-print answer) (newline)
       (rep))))  ; tail-recursive, so stack doesn't grow.
 
 (define eval-one-exp
-  (lambda (x) (top-level-eval (parse-exp x))))
+  (lambda (x) (top-level-eval (syntax-expand (parse-exp x)))))

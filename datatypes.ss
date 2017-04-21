@@ -1,40 +1,30 @@
 
 ;; Parsed expression datatypes
 
-(define-datatype expression expression? 
-  [var-exp
-      (id symbol?)]
-  [lit-exp
-	    (lit literal?)]
-  [if-exp
-	    (pred expression?)
-	    (true-body expression?)]
-  [if-else-exp
-	    (pred expression?)
-	    (true-body expression?)
-	    (false-body expression?)]
-  [quoted-exp
-    (data scheme-value?)]
-  [set!-exp
-	    (id symbol?)
-	    (body expression?)]
-  [let-exp
-	    (id symbol?)
-	    (vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	    (body (list-of expression?))]
-  [named-let-exp
-      (name symbol?)
-	    (vars (list-of (lambda (x) (and (list? x) (symbol? (car x)) (expression? (cadr x))))))
-	    (body (list-of expression?))]
-  [lambda-exp
-      (id (list-of symbol?))
-      (body (list-of expression?))]
-  [lambda-exp-variable
-      (id symbol?)
-	    (body (list-of expression?))]
-  [app-exp
-	    (rator expression?)
-      (rand (list-of expression?))])
+(define-datatype expression expression?
+	[var-exp        ; variable references
+		(id symbol?)]
+	[lit-exp        ; "Normal" data.  Did I leave out any types?
+		(datum literal?)]
+	[lambda-exp 
+		(id (lambda (x) (or (pair? x) (symbol? x) (null? x))))
+		(bodies (list-of expression?))]
+	[if-exp
+		(test expression?)
+		(true-body expression?)]
+	[if-else-exp
+		(test expression?)
+		(true-body expression?)
+		(false-body expression?)]
+	[let-exp
+		(vars (list-of symbol?))
+		(vals (list-of expression?))
+		(bodies (list-of expression?))]
+	[quoted-exp
+		(data scheme-value?)]
+	[app-exp        ; applications
+		(rator expression?)
+		(rands (list-of expression?))])
 
 (define literal?
 	(lambda (x)
