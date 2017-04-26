@@ -107,7 +107,8 @@
 			(if (null? (cdr syms))
 				args
 				(if (pair? (cdr syms))
-					(cons (car args) (get-args (cdr syms) (cdr args))))))))
+					(cons (car args) (get-args (cdr syms) (cdr args)))
+					(cons (car args) (list (cdr args))))))))
 
 (define *prim-proc-names* '(+ - * / add1 sub1 zero? not = < > <= >= cons car cdr list null? assq eq? equal? atom?
                             length list->vector list? pair? procedure? vector->list vector make-vector 
@@ -181,8 +182,8 @@
       [(cdadr) (cdadr (1st args))]
       [(cdaar) (cdaar (1st args))]
       [(quotient) (quotient (1st args) (2nd args))]
-	    [(apply) (my-apply (1st args) (2nd args))]
-	    [(map) (my-map (1st args) (2nd args))]
+	    [(apply) (myapply (1st args) (2nd args))]
+	    [(map) (mymap (1st args) (2nd args))]
 	    [(void) (void)]
 	    [(display) (display (1st args))]
 	    [(newline) (newline)]
@@ -190,7 +191,7 @@
             "Bad primitive procedure name: ~s" 
             prim-op)])))
 
-(define my-apply
+(define myapply
 	(lambda (proc args)
 		(cases proc-val proc
 			[prim-proc (name) 
@@ -200,7 +201,7 @@
 			[else
 				(error 'my-apply "D: ~s" proc)])))
 
-(define my-map
+(define mymap
 	(lambda (proc args)
 		(cases proc-val proc
 			[prim-proc (name)
@@ -223,6 +224,8 @@
 			[var-exp (id) expr]
 			[lambda-exp (id bodies)
 				(lambda-exp id (map syntax-expand bodies))]
+      [if-exp (test true-body)
+				(if-exp (syntax-expand test) (syntax-expand true-body))]
 			[if-else-exp (test true-body false-body)
 				(if-else-exp (syntax-expand test) (syntax-expand true-body) (syntax-expand false-body))]
 			[let-exp (vars vals bodies)
