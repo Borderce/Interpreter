@@ -19,6 +19,9 @@
 					(lambda () (eopl:error 'apply-env ; procedure to call if id not in env
 						"variable not found in environment: ~s"
 						id)))))]
+    [if-exp (test true-body)
+			(if (eval-exp test env)
+				(eval-exp true-body env))]
     [if-else-exp (testCase true-body false-body)
       (if (eval-exp testCase env)
         (eval-exp true-body env)
@@ -30,6 +33,15 @@
 			(let ([proc-value (eval-exp rator env)]
 				[args (eval-rands rands env)])
 			(apply-proc proc-value args))]
+    [while-exp (test bodies)
+			(let whileLoop ()
+				(if (eval-exp test env)
+					(let innerLoop ([bodies bodies])
+						(if (null? bodies)
+							(whileLoop)
+							(begin
+								(eval-exp (car bodies) env)
+								(innerLoop (cdr bodies)))))))]
 		[else (eopl:error 'eval-exp "Bad abstract syntax: ~a" expr)])))
 
 ; evaluate the list of operands, putting results into a list
