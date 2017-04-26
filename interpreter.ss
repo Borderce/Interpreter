@@ -100,7 +100,7 @@
 (define *prim-proc-names* '(+ - * / add1 sub1 zero? not = < > <= >= cons car cdr list null? assq eq? equal? atom?
                             length list->vector list? pair? procedure? vector->list vector make-vector 
                             vector-ref vector? number? symbol? set-car! set-cdr! vector-set! display 
-                            newline caar cadr cddr cdar caaar cadar cdddr caddr caadr cdaar cddar cdadr))
+                            newline caar cadr cddr cdar caaar cadar cdddr caddr caadr cdaar cddar cdadr void quotient apply map))
 
 (define init-env         ; for now, our initial global environment only contains 
   (extend-env            ; procedure names.  Recall that an environment associates
@@ -168,9 +168,41 @@
       [(cddar) (cddar (1st args))]
       [(cdadr) (cdadr (1st args))]
       [(cdaar) (cdaar (1st args))]
+      [(quotient) (quotient (1st args) (2nd args))]
+	    [(apply) (my-apply (1st args) (2nd args))]
+	    [(map) (my-map (1st args) (2nd args))]
+	    [(void) (void)]
+	    [(display) (display (1st args))]
+	    [(newline) (newline)]
       [else (error 'apply-prim-proc 
             "Bad primitive procedure name: ~s" 
             prim-op)])))
+
+(define my-apply
+	(lambda (proc args)
+		(cases proc-val proc
+			[prim-proc (name) 
+				(apply-prim-proc name args)]
+			[closure (params procedure env) 
+				(apply-proc proc args)]
+			[else
+				(error 'my-apply "D: ~s" proc)])))
+
+(define my-map
+	(lambda (proc args)
+		(cases proc-val proc
+			[prim-proc (name)
+				(let loop ((args args))
+					(if (null? args)
+						'()
+						(cons (apply-prim-proc name (list (1st args))) (loop (cdr args)))))]
+			[closure (params proc env)
+				(let loop ((args args))
+					(if (null? args)
+						'()
+						(cons (apply-proc proc (list (1st args))) (loop (cdr args)))))]
+			[else
+				(error 'my-map "D: ~s" proc)])))
 
 (define syntax-expand
 	(lambda (expr)
@@ -186,7 +218,57 @@
 			[quoted-exp (data) expr]
 			[app-exp (rator rands)
 				(app-exp (syntax-expand rator) (map syntax-expand rands))]
+      [and-exp (bodies)
+				(let loop ((bodies bodies))
+						(if (null? bodies)
+							(lit-exp #t)
+							(if (null? (cdr bodies))
+								(syntax-expand (car bodies))
+								(if-else-exp (syntax-expand (car bodies)) (loop (cdr bodies)) (lit-exp #f)))))]
+			[or-exp (bodies)
+				(let loop ((bodies bodies))
+						(if (null? bodies)
+							(lit-exp #f)
+							(if (null? (cdr bodies))
+								(syntax-expand (car bodies))
+								(syntax-expand (let-exp (list 'test) (list (syntax-expand (car bodies)))
+									(list (if-else-exp (var-exp 'test) (var-exp 'test) (loop (cdr bodies)))))))))]
+      [begin-exp (bodies) (app-exp (lambda-exp '() (map syntax-expand bodies)) '())]
+      [let*-exp (vars vals bodies) (car (let loop ([vars vars] [vals vals])
+												(if (null? vars)
+													(map syntax-expand bodies)
+													(list (app-exp (lambda-exp (list (car vars)) (loop (cdr vars) (cdr vals)))  
+																	(list(syntax-expand (car vals))))))))]
+			[while-exp (test bodies)
+				(while-exp (syntax-expand test) (map syntax-expand bodies))]
+			[cond-exp (tests bodies)
+				(let loop ([tests tests] [bodies bodies])
+					(if (null? tests) 
+						(app-exp (var-exp 'void) '())
+						(if (eqv? (cadr (car tests)) 'else)
+							(syntax-expand (car bodies))
+							(if-else-exp (syntax-expand (car tests)) (syntax-expand (car bodies)) (loop (cdr tests) (cdr bodies))))))]
+			[case-exp (expr keys bodies)
+				(syntax-expand (cond-exp (case-expand-keys expr keys) (case-expand-bodies keys bodies)))]
 			[else (eopl:error 'eval-exp "Bad abstract syntax: ~a" expr)])))
+
+(define case-expand-keys
+	(lambda (expr keys)
+		(apply append
+			(map (lambda (ls) 
+					(if (list? (cadr ls)) 
+						(map (lambda (key) (app-exp (var-exp 'eq?) (list (parse-exp key) expr))) (cadr ls))
+						(list ls)))
+				keys))))
+		
+(define case-expand-bodies
+	(lambda (keys bodies)
+		(apply append
+			(map (lambda (key-list body) 
+					(if (list? (cadr key-list)) 
+						(map (lambda (x) body) (cadr key-list))
+						(list body)))
+				keys bodies))))
 
 (define rep      ; "read-eval-print" loop.
   (lambda ()

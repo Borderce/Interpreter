@@ -42,9 +42,9 @@
 	[or-exp
 		(bodies (list-of expression?))]
 	[and-exp
-		(bodies (list-of expression?))])
-	[begin-exp
 		(bodies (list-of expression?))]
+	[begin-exp
+		(bodies (list-of expression?))])
 
 (define literal?
 	(lambda (x)
