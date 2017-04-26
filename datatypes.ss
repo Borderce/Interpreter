@@ -75,10 +75,6 @@
 	    (if (symbol? (car syms))
 		(symbol? (cdr syms))
 		#f)))))	 
-	 
-	 
-	 
-	 
 	
 ;; environment type definitions
 

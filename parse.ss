@@ -35,6 +35,16 @@
 							(null? (cddr datum)))
 							(quoted-exp (2nd datum))
 							(eopl:error 'parse-exp "invalid arguments to quote-exp: ~s" datum))]
+					[(eqv? (1st datum) 'while)]
+					[(eqv? (1st datum) 'and)
+						(and-exp (map parse-exp (cdr datum)))]
+					[(eqv? (1st datum) 'or)
+						(or-exp (map parse-exp (cdr datum)))]
+					[(eqv? (1st datum) 'let*)]
+					[(eqv? (1st datum) 'case)]
+					[(eqv? (1st datum) 'cond)]
+					[(eqv? (1st datum) 'begin)
+						(begin-exp (map parse-exp (cdr datum)))]
 					[else (app-exp (parse-exp (1st datum))
 						(map parse-exp (cdr datum)))]))]
      	[else (eopl:error 'parse-exp "bad expression: ~s" datum)])))
