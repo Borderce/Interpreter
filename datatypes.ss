@@ -24,7 +24,27 @@
 		(data scheme-value?)]
 	[app-exp        ; applications
 		(rator expression?)
-		(rands (list-of expression?))])
+		(rands (list-of expression?))]
+	[cond-exp
+		(test (list-of expression?))
+		(body (list-of expression?))]
+	[let*-exp
+		(vars (list-of symbol?))
+		(vals (list-of expression?))
+		(bodies (list-of expression?))]
+	[while-exp
+		(test expression?)
+		(bodies (list-of expression?))]
+	[case-exp
+		(expr expression?)
+		(cases (list-of expression?))
+		(clause (list-of expression?))]
+	[or-exp
+		(bodies (list-of expression?))]
+	[and-exp
+		(bodies (list-of expression?))])
+	[begin-exp
+		(bodies (list-of expression?))]
 
 (define literal?
 	(lambda (x)
