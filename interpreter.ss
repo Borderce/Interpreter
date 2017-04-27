@@ -182,11 +182,11 @@
       [(cdadr) (cdadr (1st args))]
       [(cdaar) (cdaar (1st args))]
       [(quotient) (quotient (1st args) (2nd args))]
-	    [(apply) (myapply (1st args) (2nd args))]
-	    [(map) (mymap (1st args) (2nd args))]
-	    [(void) (void)]
-	    [(display) (display (1st args))]
-	    [(newline) (newline)]
+	  [(apply) (myapply (1st args) (2nd args))]
+	  [(map) (mymap (1st args) (2nd args))]
+      [(void) (void)]
+	  [(display) (display (1st args))]
+	  [(newline) (newline)]
       [else (error 'apply-prim-proc 
             "Bad primitive procedure name: ~s" 
             prim-op)])))
