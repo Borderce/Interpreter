@@ -31,9 +31,24 @@
 							(if-else-exp (parse-exp (2nd datum)) (parse-exp (3rd datum)) (parse-exp (4th datum)))
 							(eopl:error 'parse-exp "too many cases to if expression: ~s" datum))))]
 			[(eqv? (1st datum) 'let)
-				(let-exp (map car (2nd datum)) (map parse-exp (map cadr (2nd datum))) (map parse-exp (cddr datum)))]
+				(if (symbol? (2nd datum))
+					(named-let-exp
+						(2nd datum)
+						(map car (3rd datum)) 
+						(map parse-exp (map cadr (3rd datum))) 
+						(map parse-exp (cdddr datum)))
+					(let-exp (map car (2nd datum)) 
+						(map parse-exp (map cadr (2nd datum))) 
+						(map parse-exp (cddr datum))))]
 			[(eqv? (1st datum) 'let*)
-				(let*-exp (map car (2nd datum)) (map parse-exp (map cadr (2nd datum))) (map parse-exp (cddr datum)))]
+				(let*-exp (map car (2nd datum)) 
+					(map parse-exp (map cadr (2nd datum))) 
+					(map parse-exp (cddr datum)))]
+			[(eqv? (1st datum) 'letrec) ;This will be wrong if the lambda in the letrec  has more than one body
+				(letrec-exp (map car (2nd datum)) 
+					(map 2nd (map 2nd (2nd datum))) 
+					(map parse-exp (map caddr (map 2nd (2nd datum)))) 
+					(map parse-exp (cddr datum)))]
 			[(eqv? (1st datum) 'quote)
 				(if (or (not (null? (cdr datum)))
 						(null? (cddr datum)))
@@ -54,13 +69,3 @@
 			[else (app-exp (parse-exp (1st datum))
 				(map parse-exp (cdr datum)))]))]
      [else (eopl:error 'parse-exp "bad expression: ~s" datum)])))
-
-
-
-
-
-
-
-
-
-

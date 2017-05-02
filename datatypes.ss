@@ -26,39 +26,68 @@
 		(rator expression?)
 		(rands (list-of expression?))]
 	[cond-exp
-		(test (list-of expression?))
-		(body (list-of expression?))]
-	[let*-exp
-		(vars (list-of symbol?))
-		(vals (list-of expression?))
+		(tests (list-of expression?))
 		(bodies (list-of expression?))]
 	[while-exp
 		(test expression?)
 		(bodies (list-of expression?))]
-	[case-exp
-		(expr expression?)
-		(cases (list-of expression?))
-		(clause (list-of expression?))]
+	[begin-exp
+		(bodies (list-of expression?))]
+	[let*-exp
+		(vars (list-of symbol?))
+		(vals (list-of expression?))
+		(bodies (list-of expression?))]
 	[or-exp
 		(bodies (list-of expression?))]
 	[and-exp
 		(bodies (list-of expression?))]
-	[begin-exp
-		(bodies (list-of expression?))])
+	[case-exp
+		(expr expression?)
+		(keys (list-of expression?))
+		(bodies (list-of expression?))]
+	[letrec-exp
+		(proc-names (list-of symbol?))
+		(idss (list-of (list-of symbol?)))
+		(bodies (list-of expression?))
+		(letrec-bodies (list-of expression?))]
+	[named-let-exp
+		(name symbol?)
+		(vars (list-of symbol?))
+		(vals (list-of expression?))
+		(bodies (list-of expression?))]
+  )
 
-(define literal?
+ (define literal?
 	(lambda (x)
 		(ormap
 			(lambda (pred) (pred x))
 				(list number? vector? boolean? symbol? string? null?))))
 
-	
+				
+;; environment type definitions
+
+(define scheme-value?
+  (lambda (x) #t))
+
+(define-datatype environment environment?
+	[empty-env-record]
+	[extended-env-record
+		(syms (lambda (x) (or (pair? x) (symbol? x) (null? x))))
+		(vals (list-of scheme-value?))
+		(env environment?)]
+   [recursively-extended-env-record
+		(proc-names (list-of symbol?))
+		(idss (list-of (list-of symbol?)))
+		(bodies (list-of expression?))
+		(env environment?)])
+   
+				
 ; datatype for procedures.  At first there is only one
 ; kind of procedure, but more kinds will be added later.
 
 (define-datatype proc-val proc-val?
-  [prim-proc
-   (name symbol?)]
+	[prim-proc
+		(name symbol?)]
    [closure
 		(params (lambda (x) (or (list-of symbol? x) (symbol? x) (check-syms x))))
 		(body (list-of expression?))
@@ -75,15 +104,3 @@
 	    (if (symbol? (car syms))
 		(symbol? (cdr syms))
 		#f)))))	 
-	
-;; environment type definitions
-
-(define scheme-value?
-  (lambda (x) #t))
-
-(define-datatype environment environment?
-  (empty-env-record)
-  (extended-env-record
-   (syms (lambda (x) (or (pair? x) (symbol? x) (null? x))))
-   (vals (list-of scheme-value?))
-   (env environment?)))
